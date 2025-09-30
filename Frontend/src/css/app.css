@@ -1,0 +1,29 @@
+/*
+    Document   : override
+    Description:
+        Application specific styles (cleaned)
+*/
+
+/* Screen reader / accessibility helper */
+.send-off-screen {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Reduce vertical spacing between navigation list items */
+.oj-navigationlist-item-element {
+  margin: 0;            /* remove any default margin */
+}
+
+.oj-navigationlist-item {
+  min-height: 36px;     /* default is bigger (~48px) */
+}
+
+.nav-item {
+  padding: 4px 12px;    /* was 6px 16px; reduces vertical space */
+  line-height: 1.4;
+}

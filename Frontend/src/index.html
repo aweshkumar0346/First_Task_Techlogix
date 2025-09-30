@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Meezan App</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1" />
+    <!-- <link rel="icon" href="css/images/JET-Favicon-Red-32x32.png" type="image/x-icon" /> -->
+    <!-- Default JET theme -->
+    <!-- injector:theme -->
+    <!-- endinjector -->
+    <!-- Icon fonts -->
+    <!-- injector:font -->
+    <!-- endinjector:font -->
+    <!-- App-specific CSS -->
+    <link rel="stylesheet" href="css/app.css" type="text/css" />
+    <style>
+      /* Sidebar styling */
+      .app-container {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+      
+      .sidebar {
+        width: 250px;
+        background: #ffffff;
+        border-right: 1px solid #ffffff;
+        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        overflow-y: auto;
+        transition: transform 0.3s ease;
+      }
+      
+      .sidebar-header {
+        padding: 1rem;
+        background: #ffffff;
+        color: white;
+        border-bottom: 1px solid #dee2e6;
+      }
+      
+      .sidebar-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+      
+      .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      
+      .content-header {
+        padding: 1rem 2rem;
+        background: white;
+        border-bottom: 1px solid #e9ecef;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      
+      .content-body {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+        background: #e4dcdc;
+      }
+      
+      /* Navigation list styling */
+      .oj-navigationlist-stack-icon-label {
+        background: transparent;
+      }
+      
+      .oj-navigationlist-item-element {
+        padding: 0;
+      }
+      
+      .nav-item {
+        display: block;
+        padding: 6px 16px;
+        color: #ffffff;
+        text-decoration: none;
+        border-bottom: none;
+        transition: all 0.2s ease;
+      }
+      
+      .nav-item:hover {
+        background: #e9ecef;
+        color: #fafafa;
+        text-decoration: none;
+      }
+      
+      .nav-item.active,
+      .oj-selected .nav-item {
+        background: #ffffff;
+        color: white;
+        border-left: 4px solid #0056b3;
+      }
+      
+      .nav-item-icon {
+        display: inline-block;
+        width: 20px;
+        margin-right: 10px;
+        text-align: center;
+      }
+      
+      .nav-item-label {
+        font-weight: 500;
+      }
+      
+      /* Mobile responsive */
+      @media (max-width: 768px) {
+        .sidebar {
+          position: fixed;
+          left: -250px;
+          top: 0;
+          height: 100vh;
+          z-index: 1000;
+        }
+        
+        .sidebar.open {
+          transform: translateX(250px);
+        }
+        
+        .main-content {
+          width: 100%;
+        }
+        
+        .mobile-menu-btn {
+          display: inline-block;
+          padding: 8px 12px;
+          background: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          margin-right: 10px;
+        }
+      }
+      
+      @media (min-width: 769px) {
+        .mobile-menu-btn {
+          display: none;
+        }
+      }
+      
+      /* Content area styling */
+      .content-card {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+      }
+      
+      .page-title {
+        margin: 0 0 1rem 0;
+        color: #ffffff;
+        font-weight: 600;
+      }
+
+      /* ---- FORCE COMPACT SPACING IN SIDEBAR ---- */
+      .sidebar .oj-navigationlist-item-element {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .sidebar .oj-navigationlist-item {
+        min-height: 32px !important; /* reduce item height */
+      }
+
+      .sidebar .nav-item {
+        padding: 4px 12px !important; /* reduce vertical padding */
+        line-height: 1.3 !important;
+      }
+
+   
+    </style>
+  </head>
+  <body class="oj-web-applayout-body">
+    <!-- Template for rendering navigation items -->
+     
+    <script type="text/html" id="navTemplate">
+      <li class="oj-navigationlist-item-element">
+        <a href="#" class="nav-item" data-bind="css: { active: $parent.selection.path() === $data.path }">
+          <span class="nav-item-icon" data-bind="css: $data.detail.iconClass"></span>
+          <span class="nav-item-label" data-bind="text: $data.detail.label"></span>
+        </a>
+      </li>
+    </script>
+    <div id="globalBody">
+      <div id="announce" tabindex="-1" class="send-off-screen" data-bind="attr: { 'aria-live': manner }" aria-atomic="true">
+        <p id="ariaLiveMessage" data-bind="text: message"></p>
+      </div>
+      
+      <!-- Main Application Container -->
+      <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" data-bind="css: { open: sideDrawerOn }">
+          <oj-navigation-list
+            id="sideNav"
+            edge="start"
+            data="[[navDataProvider]]"
+            selection="{{selection.path}}"
+            item.renderer="[[KnockoutTemplateUtils.getRenderer('navTemplate', true)]]"
+            class="oj-navigationlist-stack-icon-label">
+          </oj-navigation-list>
+
+          
+
+        </nav>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+          <!-- Content Header -->
+          <!--
+          <header class="content-header">
+            <button class="mobile-menu-btn" data-bind="click: toggleDrawer">
+              ☰ Menu
+            </button>
+            <h1 class="page-title" data-bind="text: currentPageTitle">Dashboard</h1>
+          </header>
+          -->
+          <!-- Content Body -->
+          <div class="content-body">
+            <div class="content-card">
+              <!-- Pages will load here -->
+              <oj-module
+                role="main"
+                config="[[moduleAdapter.koObservableConfig]]">
+              </oj-module>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- JET scripts -->
+    <!-- injector:scripts -->
+    <!-- endinjector -->
+  </body>
+</html>

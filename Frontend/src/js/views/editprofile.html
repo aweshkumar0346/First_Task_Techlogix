@@ -1,0 +1,368 @@
+<style>
+  .container {
+    display: flex;
+    min-height: 100vh;
+  }
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header-icons {
+    display: flex;
+    gap: 15px;
+  }
+
+  .header-icon {
+    width: 20px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #7b2d8e, #9c4aa6);
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header h1 {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .form-box {
+    margin-top: 0px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    flex: 1;
+  }
+
+  .edit-profile-form {
+    display: flex;
+    flex-wrap: nowrap; /* prevents right side from wrapping down */
+    
+  }
+
+  .left-form {
+    flex: 2;
+    background: #fff;
+    padding: 20px;
+    min-width: 0;    
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+  }
+
+  .form-group input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus {
+    border-color: #6f1d7c;
+  }
+  input.invalid {
+    border-color: #e53935;
+    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.08);
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    background-color: #fff; /* ensures white background */
+    appearance: none; /* removes default browser styling */
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: #6f1d7c;
+  }
+
+  input.invalid,
+  select.invalid {
+    border-color: #e53935;
+    box-shadow:
+     0 0 0 3px rgba(229, 57, 53, 0.08);
+  }
+
+/* Paragraph below Country/City */
+.helper-text {
+  font-size: 14px;
+  color: #080808;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+/* Back & Next Buttons */
+  .back-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #6f1d7c;
+    background-color: silver;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0.9;
+    width: 80px;
+  }
+
+  .next-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #6f1d7c;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 160px;
+  }
+
+
+  .form-actions {
+  display: flex;
+  gap: 10px;   /* same limit as inputs */
+}
+
+
+
+.left-form * {
+  box-sizing: border-box; /* keeps padding inside width */
+}
+
+.left-form .form-group input,
+.left-form .form-group select,
+.left-form .helper-text {
+  width: 100%;       /* all take same full width of .left-form */
+  max-width: 280px;  /* adjust this value to control total width */
+  display: block;    /* ensures proper stacking */
+}
+
+.left-form h3 {
+  font-size: 22px;
+}
+
+  /* Right Panel */
+
+  .right-form {
+    flex: 1;
+    background: #ffffff;
+    padding: 20px;
+    min-width: 0;    
+  }
+
+.right-form h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.cnic-image {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.cnic-image img {
+  width: 120px;
+  height: auto;
+}
+
+
+
+.cnic-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px; /* space between number & date */
+  margin-bottom: 20px; /* space below CNIC info */
+}
+
+.cnic-item p {
+  margin: 2px 0;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* First line (labels) */
+.cnic-item p:first-child {
+  color: #6f1d7c; /* Purple */
+}
+
+/* Second line (values) */
+.cnic-item p:last-child {
+  color: #000; /* Black */
+}
+
+
+.cnic-note {
+  font-size: 12px;       /* smaller font size */
+  color: rgba(196, 190, 190, 0.8); /* light white */
+  line-height: 1.4;      /* keeps it readable */
+}
+
+.cnic-note a {
+  color: #56c0f1;           /* link also in white */
+  text-decoration: underline;
+  display: inline-block;   /* allows margin */
+  margin-top: 6px;  
+}
+
+.update-nic-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #6f1d7c;         /* purple text */
+  background-color: silver;
+  border: none;
+  border-radius: 6px;
+  cursor: not-allowed;    /* shows disabled cursor */
+  opacity: 0.8;  
+  width: 300px;         /* slight fade to show it's disabled */
+}
+
+</style>
+
+<div class="container">
+  <div class="main-content">
+    <div class="header">
+      <h1 id="page-title">My Profile</h1>
+      <div class="header-icons">
+        <div class="header-icon">🏠</div>
+        <div class="header-icon">⚡</div>
+      </div>
+    </div>
+
+    <div class="form-box">
+      <form class="edit-profile-form">
+        <!-- Left Panel -->
+        <div class="left-form">
+          <h3>Edit Personal Details</h3>
+
+          <div class="form-group">
+            <label>Registered Contact Number</label>
+            <input
+              type="text"
+              data-bind="value: contactNumber, valueUpdate:'input' "
+            />
+            <div
+              data-bind="visible: contactError(), text: contactError"
+              style="color: red"
+            ></div>
+          </div>
+
+          <div class="form-group">
+            <label>Registered Email Address</label>
+            <input
+              type="email"
+              data-bind="value: email, valueUpdate:'input', css: { invalid: emailError() } "
+            />
+            <div
+              data-bind="visible: emailError().length > 0, text: emailError"
+              style="color: red; margin-top: 4px"
+            ></div>
+          </div>
+
+          <div class="form-group">
+            <label>Address</label>
+            <input
+              type="text"
+              data-bind="value: address, valueUpdate:'input', css: { invalid: addressError() }"
+            />
+            <div
+              data-bind="visible: addressError().length > 0, text: addressError"
+              style="color: red; margin-top: 4px"
+            ></div>
+          </div>
+
+          <div class="form-group">
+            <label>Country</label>
+            <select
+              data-bind="options: countries, value: selectedCountry, optionsCaption: 'Select a country'"
+            ></select>
+          </div>
+
+          <div class="form-group">
+            <label>City</label>
+            <select
+              data-bind="options: availableCities, value: selectedCity, optionsCaption: 'Select a city', enable: selectedCountry"
+            ></select>
+          </div>
+           <p class="helper-text">
+              Your contact update request will be processed within <strong> three working days.</strong>
+          </p>
+          <div class="form-actions">
+            <button  class="back-btn" data-bind="click: goBack">Back</button>
+            <button  class="next-btn" data-bind="click: goNext">Next</button>
+          </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-form">
+          <h3>Update CNIC Details</h3>
+          
+          <!-- CNIC Image -->
+          <div class="cnic-image">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="CNIC Card">
+          </div>
+
+          <!-- CNIC Info -->
+          <div class="cnic-info">
+            <div class="cnic-item">
+              <p>CNIC Number:</p>
+              <p>42201-0000000-1</p>
+            </div>
+            <div class="cnic-item">
+              <p>CNIC Expiration Date:</p>
+              <p>25 Jan 2022</p>
+            </div>
+          </div>
+
+          <div class="cnic-note">
+          <p>
+            If you have renewed your CNIC, kindly update the CNIC issuance date to avoid any restriction on your account.  
+            <br><br>
+            Note: If you still haven’t renewed your CNIC please do so by visiting the nearest NADRA office or visiting the NADRA website for update:  
+            <a href="https://id.nadra.gov.pk/e-id/getRegistered" target="_blank">
+              id.nadra.gov.pk/e-id/getRegistered
+            </a>
+          </p>
+
+          <button class="update-nic-btn" disabled>Update NIC</button>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
