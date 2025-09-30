@@ -60,4 +60,6 @@
 /**
  * Load the application's entry point file
  */
-require(['./root']);
+require(['./root',
+  "jet-composites/header-component/loader"
+]);
