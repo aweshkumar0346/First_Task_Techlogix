@@ -49,7 +49,31 @@ define(['knockout','../accUtils'],
         }
       }, 1000);
 
-      
+      // Auto-jump logic for OTP inputs
+self.handleKeyUp = function (data, event) {
+  const input = event.target;
+
+  // Move forward on digit entry
+  if (input.value.length === 1 && event.key !== "Backspace") {
+    const next = input.nextElementSibling;
+    if (next && next.tagName === "INPUT") {
+      next.focus();
+    }
+  }
+
+  // Move back on backspace if empty
+  if (event.key === "Backspace" && input.value === "") {
+    const prev = input.previousElementSibling;
+    if (prev && prev.tagName === "INPUT") {
+      prev.focus();
+    }
+  }
+
+  return true;
+};
+
+
+
       /**
        * Optional ViewModel method invoked after the View is inserted into the
        * document DOM.  The application can put logic that requires the DOM being

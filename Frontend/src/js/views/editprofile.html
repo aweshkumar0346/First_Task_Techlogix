@@ -148,7 +148,18 @@
     cursor: pointer;
     width: 160px;
   }
+.next-btn.disabled {
+  background-color: #c8a9cf; /* light purple */
+  color: #eee;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 
+.next-btn.enabled {
+  background-color: #6f1d7c; /* dark purple */
+  color: #fff;
+  opacity: 1;
+}
 
   .form-actions {
   display: flex;
@@ -324,7 +335,13 @@
           </p>
           <div class="form-actions">
             <button  class="back-btn" data-bind="click: goBack">Back</button>
-            <button  class="next-btn" data-bind="click: goNext">Next</button>
+            <button 
+  type="button" 
+  class="next-btn" 
+  data-bind="click: goNext, enable: isFormValid, css: { enabled: isFormValid, disabled: !isFormValid() }">
+  Next
+</button>
+
           </div>
         </div>
 

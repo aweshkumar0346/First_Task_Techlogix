@@ -85,7 +85,7 @@ self.emailError = ko.computed(function() {
     // Basic email regex
     var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(value)) {
-        return "Invalid email format";
+        return "Enter valid email format";
     }
 
     return ""; // valid email
@@ -130,6 +130,21 @@ self.availableCities = ko.computed(function() {
   // image Upload Setup
   self.cnicImage = ko.observable("src/css/images/nic.svg");  
 
+// Computed: form is valid when all inputs are filled correctly
+self.isFormValid = ko.computed(function () {
+  return (
+    self.contactNumber().trim().length > 0 &&
+    self.contactError() === "" &&
+    self.email().trim().length > 0 &&
+    self.emailError() === "" &&
+    self.address().trim().length > 0 &&
+    self.addressError() === "" &&
+    self.selectedCountry() &&
+    self.selectedCity()
+  );
+});
+
+  
     // Example: Change dynamically (for testing)
     
       /**
