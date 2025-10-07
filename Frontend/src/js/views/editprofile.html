@@ -45,7 +45,7 @@
     background: #fff;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    
     flex: 1;
   }
 
@@ -263,6 +263,21 @@
   width: 300px;         /* slight fade to show it's disabled */
 }
 
+.content-body {
+        flex: 1;
+        
+        overflow-y: auto;
+        background: #beb6b6;
+      }
+
+      .content-card {
+        background: rgb(255, 255, 255);
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin: 1rem;
+      }
+
 </style>
 
 <div class="container">
@@ -275,7 +290,9 @@
       </div>
     </div>
 
-    <div class="form-box">
+    <div class="content-body">
+      <div class="content-card">
+        <div class="form-box">
       <form class="edit-profile-form">
         <!-- Left Panel -->
         <div class="left-form">
@@ -380,6 +397,8 @@
 
         </div>
       </form>
+        </div>
+      </div>
     </div>
   </div>
 </div>

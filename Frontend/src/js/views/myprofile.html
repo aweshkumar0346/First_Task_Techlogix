@@ -163,6 +163,21 @@
     opacity: 0.9;
     transform: translateY(-1px);
   }
+
+  .content-body {
+        flex: 1;
+        
+        overflow-y: auto;
+        background: #beb6b6;
+      }
+
+      .content-card {
+        background: rgb(255, 255, 255);
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin: 1rem;
+      }
 </style>
 
 <div class="container">
@@ -175,7 +190,9 @@
       </div>
     </div>
 
-    <div class="content">
+    <div class="content-body">
+      <div class="content-card">
+        <div class="content">
       <div class="profile-header">
         <h2>My Profile</h2>
       </div>
@@ -185,25 +202,25 @@
         <div class="detail-box">
 
           <div class="box-header">
-            <p class="name">MUHAMMAD ALI KHAN</p>
-            <p class="account-title">Account Title</p>
+            <p class="name" data-bind="text: name"></p>
+            <p class="account-title" data-bind="text: accountTitle"></p>
           </div>
 
           <div class="detail-row">
 
             <div class="detail-item">
               <div class="detail-label">Job Status</div>
-              <div class="detail-value">Active Employee</div>
+              <div class="detail-value" data-bind="text: jobStatus"></div>
             </div>
 
             <div class="detail-item">
               <div class="detail-label">Date Creation Status</div>
-              <div class="detail-value">Best Status</div>
+              <div class="detail-value" data-bind="text: dateCreationStatus"></div>
             </div>
 
             <div class="detail-item">
               <div class="detail-label">ERC Employee Status</div>
-              <div class="detail-value">16 Sep 2023</div>
+              <div class="detail-value" data-bind="text: ercEmployeeStatus"></div>
             </div>
 
             <div class="detail-item">
@@ -219,12 +236,12 @@
 
             <div class="detail-item">
               <div class="detail-label">Last Login Details</div>
-              <div class="detail-value">Saturday, 17 April 2021 , 11:58 AM</div>
+              <div class="detail-value" data-bind="text: lastLoginDetails"></div>
             </div>
 
             <div class="detail-item">
               <div class="detail-label">Date of Birth</div>
-              <div class="detail-value">15 Feb 1992</div>
+              <div class="detail-value" data-bind="text: dateOfBirth"></div>
             </div>
 
             <div class="detail-item">
@@ -237,9 +254,7 @@
           <div class="detail-row">
             <div class="detail-item full-span">
               <div class="detail-label">Registered Home Address</div>
-              <div class="detail-value">
-                Flat No. 54, Namira Square Apartments, Block 17K,
-                Gulshan-e-Shamim, Karachi.
+              <div class="detail-value" data-bind="text: registeredHomeAddress">
               </div>
             </div>
           </div>
@@ -248,17 +263,17 @@
 
             <div class="detail-item">
               <div class="detail-label">Registered Contact Number</div>
-              <div class="detail-value">0322-3749010</div>
+              <div class="detail-value" data-bind="text: registeredContactNumber"></div>
             </div>
 
             <div class="detail-item">
               <div class="detail-label">Registered Email Address</div>
-              <div class="detail-value">alikhan@gmail.com</div>
+              <div class="detail-value" data-bind="text: registeredEmailAddress"></div>
             </div>
 
             <div class="detail-item">
               <div class="detail-label">Location</div>
-              <div class="detail-value">Karachi, Pakistan</div>
+              <div class="detail-value" data-bind="text: location"></div>
             </div>
 
           </div>
@@ -270,6 +285,8 @@
         <button class="btn btn-primary" data-bind="click:move">Edit Personal Details</button>
       </div>
 
+        </div>
+      </div>
     </div>
   </div>
 </div>
