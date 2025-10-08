@@ -5,183 +5,145 @@
  * as shown at https://oss.oracle.com/licenses/upl/
  * @ignore
  */
-/*
- * Your customer ViewModel code goes here
- */
-define(['knockout', '../accUtils'],
- function(ko,accUtils, Router) {
-    function EditPageViewModel(params) {
-      
-      // Below are a set of the ViewModel methods invoked by the oj-module component.
-      // Please reference the oj-module jsDoc for additional information.
-      
-      var self = this;
-      const { router } = params;
+define(['knockout', '../accUtils'], 
+function(ko, accUtils) {
+  function EditPageViewModel(params) {
+    var self = this;
+    const { router } = params;
 
-      self.goBack = () => {
-        router.go({path:"myprofile"});
-      }
+    // 🔙 Go Back
+    self.goBack = () => {
+      router.go({ path: "myprofile" });
+    };
 
-      self.goNext = () => {
-        router.go({path:"otpscreen"});
-      }
-
-    
-
-
-    // Contact Number Setup
+    // Observables (form fields)
+    self.id = ko.observable();
     self.contactNumber = ko.observable("");
-
-// Subscribe: auto-clean + format
-self.contactNumber.subscribe(function(newValue) {
-  // If contains any letters, keep raw input (don’t clean yet)
-  if (/[a-zA-Z]/.test(newValue)) {
-    // Don’t overwrite here, let computed handle error message
-    return;
-  }
-
-  var raw = newValue.replace(/\D/g, ""); // keep only digits
-  if (raw.length > 0) {
-    if (raw.length <= 4) {
-      self.contactNumber(raw);
-    } else {
-      self.contactNumber(raw.replace(/(\d{4})(\d{0,7})/, "$1-$2"));
-    }
-  }
-});
-
-// Validation: digits only + exactly 11 digits
-self.contactError = ko.computed(function() {
-  var value = self.contactNumber();
-  
-  // 1. Check for letters
-  if (/[a-zA-Z]/.test(value)) {
-    return "Invalid number: letters not allowed";
-  }
-
-  // 2. Only digits check
-  var raw = value.replace(/\D/g, "");
-  if (raw.length === 0) {
-    return ""; // no error yet
-  }
-  if (raw.length > 11) {
-    return "Too many digits! Must be 11 digits";
-  }
-  return ""; // valid
-});
-
-
-  // Email Setup
     self.email = ko.observable("");
-
-// Error validation
-self.emailError = ko.computed(function() {
-    var value = self.email().trim();
-    
-    if (value.length === 0) {
-        return ""; // empty input = no error
-    }
-
-    // Basic email regex
-    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(value)) {
-        return "Enter valid email format";
-    }
-
-    return ""; // valid email
-});
-
-    // Address Setup
     self.address = ko.observable("");
+    self.selectedCountry = ko.observable("");
+    self.selectedCity = ko.observable("");
+    self.cnicImage = ko.observable("src/css/images/nic.svg"); // default
 
-// Validation: must be between 25 and 30 characters
-self.addressError = ko.computed(function() {
-    var value = self.address().trim();
+    // Country & city data
+    self.countries = ["Pakistan", "USA", "UK", "Canada", "Australia"];
+    self.citiesData = {
+      "Pakistan": ["Karachi", "Lahore", "Islamabad", "Multan", "Peshawar"],
+      "USA": ["New York", "Los Angeles", "Chicago", "Houston", "San Francisco"],
+      "UK": ["London", "Manchester", "Liverpool", "Birmingham", "Leeds"],
+      "Canada": ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"],
+      "Australia": ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"]
+    };
 
-    if (value.length === 0) {
-        return ""; // empty input → no error yet
-    }
-    if (value.length < 25 || value.length > 30) {
-        return "Address should have 25-30 characters maximum";
-    }
-    return ""; // valid
-});
+    // Computed cities based on country
+    self.availableCities = ko.computed(function() {
+      return self.selectedCountry() ? self.citiesData[self.selectedCountry()] : [];
+    });
 
-      // Country and City Setup
+    // 📥 Load data from localStorage (auto-fill)
+    self.loadFromLocalStorage = function() {
+      const storedUser = localStorage.getItem("currentUser");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        self.id(user.id);
+        self.contactNumber(user.registeredContactNumber || "");
+        self.email(user.registeredEmailAddress || "");
+        self.address(user.registeredHomeAddress || "");
+        self.selectedCountry(user.country || "");
+        self.selectedCity(user.city || "");
+        
+      }
+    };
 
-      self.selectedCountry = ko.observable();
-self.selectedCity = ko.observable();
+    // 📞 Contact Number Validation
+    self.contactError = ko.computed(function() {
+      var value = self.contactNumber().trim();
+      if (/[a-zA-Z]/.test(value)) return "Invalid number: letters not allowed";
+      var raw = value.replace(/\D/g, "");
+      if (raw.length > 0 && raw.length !== 11)
+        return "Number must be 11 digits";
+      return "";
+    });
 
-// JSON data
-self.countries = ["Pakistan", "USA", "UK", "Canada", "Australia"];
-self.citiesData = {
-  "Pakistan": ["Karachi", "Lahore", "Islamabad", "Multan", "Peshawar"],
-  "USA": ["New York", "Los Angeles", "Chicago", "Houston", "San Francisco"],
-  "UK": ["London", "Manchester", "Liverpool", "Birmingham", "Leeds"],
-  "Canada": ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"],
-  "Australia": ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"]
-};
+    // 📧 Email Validation
+    self.emailError = ko.computed(function() {
+      var value = self.email().trim();
+      if (!value) return "";
+      var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailPattern.test(value) ? "" : "Enter valid email format";
+    });
 
-// Computed: available cities depend on selected country
-self.availableCities = ko.computed(function() {
-  return self.selectedCountry() ? self.citiesData[self.selectedCountry()] : [];
-});
+    // 🏠 Address Validation (25–30 chars)
+    self.addressError = ko.computed(function() {
+      var value = self.address().trim();
+      if (!value) return "";
+      if (value.length < 25 || value.length > 30)
+        return "Address must be 25–30 characters long";
+      return "";
+    });
 
-  // image Upload Setup
-  self.cnicImage = ko.observable("src/css/images/nic.svg");  
+    // ✅ Form Validity (for enabling Next button)
+    self.isFormValid = ko.computed(function() {
+      return (
+        self.contactNumber().trim().length > 0 &&
+        self.contactError() === "" &&
+        self.email().trim().length > 0 &&
+        self.emailError() === "" &&
+        self.address().trim().length > 0 &&
+        self.addressError() === "" &&
+        self.selectedCountry() &&
+        self.selectedCity()
+      );
+    });
 
-// Computed: form is valid when all inputs are filled correctly
-self.isFormValid = ko.computed(function () {
-  return (
-    self.contactNumber().trim().length > 0 &&
-    self.contactError() === "" &&
-    self.email().trim().length > 0 &&
-    self.emailError() === "" &&
-    self.address().trim().length > 0 &&
-    self.addressError() === "" &&
-    self.selectedCountry() &&
-    self.selectedCity()
-  );
-});
+    // 🎨 Computed for button CSS class (light/dark)
+    self.nextButtonClass = ko.computed(function() {
+      return self.isFormValid() ? "next-btn-dark" : "next-btn-light";
+    });
 
-  
-    // Example: Change dynamically (for testing)
-    
-      /**
-       * Optional ViewModel method invoked after the View is inserted into the
-       * document DOM.  The application can put logic that requires the DOM being
-       * attached here.
-       * This method might be called multiple times - after the View is created
-       * and inserted into the DOM and after the View is reconnected
-       * after being disconnected.
-       */
-      this.connected = () => {
-        accUtils.announce('EditPage page loaded.', 'assertive');
-        document.title = "EditPage";
-        // Implement further logic if needed
+    // 🚀 Update profile API call and move to OTP screen
+    self.goNext = async function() {
+      if (!self.isFormValid()) {
+        alert("Please fill all fields correctly before proceeding!");
+        return;
+      }
+
+      const payload = {
+        id: self.id(),
+        registeredContactNumber: self.contactNumber(),
+        registeredEmailAddress: self.email(),
+        registeredHomeAddress: self.address(),
+        country: self.selectedCountry(),
+        city: self.selectedCity()
       };
 
-      /**
-       * Optional ViewModel method invoked after the View is disconnected from the DOM.
-       */
-      this.disconnected = () => {
-        // Implement if needed
-      };
+      try {
+        const response = await fetch(`http://localhost:8080/update/${self.id()}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-      /**
-       * Optional ViewModel method invoked after transition to the new View is complete.
-       * That includes any possible animation between the old and the new View.
-       */
-      this.transitionCompleted = () => {
-        // Implement if needed
-      };
-    }
+        if (!response.ok) throw new Error("Failed to update profile");
 
-    /*
-     * Returns an instance of the ViewModel providing one instance of the ViewModel. If needed,
-     * return a constructor for the ViewModel so that the ViewModel is constructed
-     * each time the view is displayed.
-     */
-    return EditPageViewModel;
+        console.log("Profile updated successfully!");
+        router.go({ path: "otpscreen" });
+      } catch (err) {
+        console.error("Update failed:", err);
+        alert("Error updating profile. Please try again.");
+      }
+    };
+
+    // 🔄 On page load
+    this.connected = () => {
+      accUtils.announce('Edit Page loaded.', 'assertive');
+      document.title = "Edit Profile";
+      self.loadFromLocalStorage();
+    };
+
+    this.disconnected = () => {};
+    this.transitionCompleted = () => {};
   }
-);
+
+  return EditPageViewModel;
+});
