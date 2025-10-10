@@ -26,23 +26,4 @@ public class userservice {
     public User createuser(User user){
         return repo.save(user);
     }
-
-    public User updateUser(Long id, User updateuser){
-        Optional<User> existingUserOpt = repo.findById(id);
-
-        if(existingUserOpt.isPresent()){
-            User existingUser = existingUserOpt.get();
-
-            existingUser.setRegisteredContactNumber(updateuser.getRegisteredContactNumber());
-            existingUser.setRegisteredEmailAddress(updateuser.getRegisteredEmailAddress());
-            existingUser.setRegisteredHomeAddress(updateuser.getRegisteredHomeAddress());
-            existingUser.setLocation(updateuser.getLocation());
-
-            return repo.save(existingUser);
-        }
-        else{
-            return null;
-        }
-    }
-
 }

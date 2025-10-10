@@ -140,7 +140,9 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
           detail: { 
             label: 'OTP Screen', 
             iconClass: 'oj-ux-ico-fire',
-            title: 'OTP Screen'
+            title: 'OTP Screen',
+            view: 'js/views/otpscreen.html',       // Path to your HTML
+            viewModel: 'js/viewModels/otpscreen'
           } 
         }
        

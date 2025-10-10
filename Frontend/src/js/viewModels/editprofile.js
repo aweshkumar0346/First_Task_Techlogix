@@ -5,8 +5,7 @@
  * as shown at https://oss.oracle.com/licenses/upl/
  * @ignore
  */
-define(['knockout', '../accUtils'], 
-function(ko, accUtils) {
+define(["knockout", "../accUtils"], function (ko, accUtils) {
   function EditPageViewModel(params) {
     var self = this;
     const { router } = params;
@@ -28,20 +27,22 @@ function(ko, accUtils) {
     // Country & city data
     self.countries = ["Pakistan", "USA", "UK", "Canada", "Australia"];
     self.citiesData = {
-      "Pakistan": ["Karachi", "Lahore", "Islamabad", "Multan", "Peshawar"],
-      "USA": ["New York", "Los Angeles", "Chicago", "Houston", "San Francisco"],
-      "UK": ["London", "Manchester", "Liverpool", "Birmingham", "Leeds"],
-      "Canada": ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"],
-      "Australia": ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"]
+      Pakistan: ["Karachi", "Lahore", "Islamabad", "Multan", "Peshawar"],
+      USA: ["New York", "Los Angeles", "Chicago", "Houston", "San Francisco"],
+      UK: ["London", "Manchester", "Liverpool", "Birmingham", "Leeds"],
+      Canada: ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"],
+      Australia: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"],
     };
 
     // Computed cities based on country
-    self.availableCities = ko.computed(function() {
-      return self.selectedCountry() ? self.citiesData[self.selectedCountry()] : [];
+    self.availableCities = ko.computed(function () {
+      return self.selectedCountry()
+        ? self.citiesData[self.selectedCountry()]
+        : [];
     });
 
     // 📥 Load data from localStorage (auto-fill)
-    self.loadFromLocalStorage = function() {
+    self.loadFromLocalStorage = function () {
       const storedUser = localStorage.getItem("currentUser");
       if (storedUser) {
         const user = JSON.parse(storedUser);
@@ -51,22 +52,31 @@ function(ko, accUtils) {
         self.address(user.registeredHomeAddress || "");
         self.selectedCountry(user.country || "");
         self.selectedCity(user.city || "");
-        
       }
     };
 
     // 📞 Contact Number Validation
-    self.contactError = ko.computed(function() {
-      var value = self.contactNumber().trim();
-      if (/[a-zA-Z]/.test(value)) return "Invalid number: letters not allowed";
+    self.contactError = ko.computed(function () {
+      var value = self.contactNumber();
+
+      // 1. Check for letters
+      if (/[a-zA-Z]/.test(value)) {
+        return "Invalid number: letters not allowed";
+      }
+
+      // 2. Only digits check
       var raw = value.replace(/\D/g, "");
-      if (raw.length > 0 && raw.length !== 11)
-        return "Number must be 11 digits";
-      return "";
+      if (raw.length === 0) {
+        return ""; // no error yet
+      }
+      if (raw.length > 11) {
+        return "Too many digits! Must be 11 digits";
+      }
+      return ""; // valid
     });
 
     // 📧 Email Validation
-    self.emailError = ko.computed(function() {
+    self.emailError = ko.computed(function () {
       var value = self.email().trim();
       if (!value) return "";
       var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -74,7 +84,7 @@ function(ko, accUtils) {
     });
 
     // 🏠 Address Validation (25–30 chars)
-    self.addressError = ko.computed(function() {
+    self.addressError = ko.computed(function () {
       var value = self.address().trim();
       if (!value) return "";
       if (value.length < 25 || value.length > 30)
@@ -83,7 +93,7 @@ function(ko, accUtils) {
     });
 
     // ✅ Form Validity (for enabling Next button)
-    self.isFormValid = ko.computed(function() {
+    self.isFormValid = ko.computed(function () {
       return (
         self.contactNumber().trim().length > 0 &&
         self.contactError() === "" &&
@@ -97,14 +107,15 @@ function(ko, accUtils) {
     });
 
     // 🎨 Computed for button CSS class (light/dark)
-    self.nextButtonClass = ko.computed(function() {
+    self.nextButtonClass = ko.computed(function () {
       return self.isFormValid() ? "next-btn-dark" : "next-btn-light";
     });
 
     // 🚀 Update profile API call and move to OTP screen
-    self.goNext = async function() {
+    // 🚀 Generate OTP before update
+    self.goNext = async function () {
       if (!self.isFormValid()) {
-        alert("Please fill all fields correctly before proceeding!");
+        alert("Please fill all fields before proceeding!");
         return;
       }
 
@@ -114,29 +125,36 @@ function(ko, accUtils) {
         registeredEmailAddress: self.email(),
         registeredHomeAddress: self.address(),
         country: self.selectedCountry(),
-        city: self.selectedCity()
+        city: self.selectedCity(),
       };
 
       try {
-        const response = await fetch(`http://localhost:8080/update/${self.id()}`, {
-          method: "PUT",
+        const response = await fetch("http://localhost:8080/request-otp", {
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
         });
 
-        if (!response.ok) throw new Error("Failed to update profile");
+        if (!response.ok) throw new Error("Failed to generate OTP");
 
-        console.log("Profile updated successfully!");
+        const data = await response.json();
+        console.log("OTP requested for:", data.email);
+
+        // ✅ Save pending update and email for verification
+        localStorage.setItem("pendingUpdate", JSON.stringify(payload));
+        localStorage.setItem("otpEmail", self.email()); // ✅ fixed key
+
+        alert("OTP sent! Please enter it on the next screen.");
         router.go({ path: "otpscreen" });
       } catch (err) {
-        console.error("Update failed:", err);
-        alert("Error updating profile. Please try again.");
+        console.error(err);
+        alert("Error generating OTP. Please try again.");
       }
     };
 
     // 🔄 On page load
     this.connected = () => {
-      accUtils.announce('Edit Page loaded.', 'assertive');
+      accUtils.announce("Edit Page loaded.", "assertive");
       document.title = "Edit Profile";
       self.loadFromLocalStorage();
     };

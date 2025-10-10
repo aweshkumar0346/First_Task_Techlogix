@@ -1,116 +1,151 @@
 /**
  * @license
- * Copyright (c) 2014, 2025, Oracle and/or its affiliates.
+ * Copyright (c) 2014, 2025, Oracle
  * Licensed under The Universal Permissive License (UPL), Version 1.0
- * as shown at https://oss.oracle.com/licenses/upl/
  * @ignore
  */
-/*
- * Your dashboard ViewModel code goes here
- */
-define(['knockout','../accUtils'],
- function(ko,accUtils, Router) {
-    function OTPScreenViewModel(params) {
-      // Below are a set of the ViewModel methods invoked by the oj-module component.
-   
-    // Please reference the oj-module jsDoc for additional information.
-  var self = this;
+define(["knockout", "../accUtils"], function (ko, accUtils) {
+  function OTPScreenViewModel(params) {
+    var self = this;
+    const { router } = params;
+    console.log("🟢 OTPScreenViewModel loaded");
 
-  const { router } = params;
-      self.goBack=()=>{
-        router.go({path:"editprofile"});
+    // 🔹 Navigation
+    self.goBack = () => router.go({ path: "editprofile" });
+    self.goNext = () => router.go({ path: "myprofile" });
+
+    // 🔹 OTP input observables (6 digits)
+    self.otpDigits = ko.observableArray([
+      ko.observable(""),
+      ko.observable(""),
+      ko.observable(""),
+      ko.observable(""),
+      ko.observable(""),
+      ko.observable(""),
+    ]);
+
+    // 🔹 Timer (5 minutes)
+    self.timeLeft = ko.observable(300); // 5 min = 300 sec
+    self.formattedTime = ko.computed(() => {
+      var minutes = Math.floor(self.timeLeft() / 60);
+      var seconds = self.timeLeft() % 60;
+      return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+    });
+
+    // ⏳ Countdown timer logic
+    var interval = setInterval(() => {
+      if (self.timeLeft() > 0) self.timeLeft(self.timeLeft() - 1);
+      else clearInterval(interval);
+    }, 1000);
+
+    // 🔹 Auto-jump and digit-only input (fixed for live update)
+    self.handleKeyUp = function (data, event) {
+      const input = event.target;
+      const index = parseInt(input.getAttribute("data-index"));
+      const value = input.value.replace(/[^0-9]/g, ""); // only digits allowed
+
+      // Update observable directly (fix: live update)
+      self.otpDigits()[index](value);
+
+      // Move forward when a digit is entered
+      if (value.length === 1 && event.key !== "Backspace") {
+        const next = input.nextElementSibling;
+        if (next && next.tagName === "INPUT") next.focus();
       }
 
-      self.goNext=()=>{
-        router.go({path:"myprofile"});
+      // Move back on backspace if empty
+      if (event.key === "Backspace" && value === "") {
+        const prev = input.previousElementSibling;
+        if (prev && prev.tagName === "INPUT") prev.focus();
       }
 
-      // OTP Digits
-      self.otpDigits = ko.observableArray(["", "", "", "", "", ""]);
+      return true;
+    };
 
+    // 🔹 Verify OTP and update backend
+    self.verifyOtp = async function () {
+      console.log("✅ verifyOtp() called");
+      const email = localStorage.getItem("otpEmail");
+      const otp = self
+        .otpDigits()
+        .map((d) => (d() || "").trim())
+        .join("");
 
-      
+      console.log(
+        "OTP array raw:",
+        self.otpDigits().map((d) => d())
+      );
+      console.log("Joined OTP:", otp);
+      console.log("Email from localStorage:", email);
 
-      // Timer
-      self.timeLeft = ko.observable(300); // 5 min = 300 sec
+      if (!/^\d{6}$/.test(otp)) {
+        alert("Please enter a valid 6-digit OTP.");
+        return;
+      }
 
-      self.formattedTime = ko.computed(function() {
-        var minutes = Math.floor(self.timeLeft() / 60);
-        var seconds = self.timeLeft() % 60;
-        return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-      });
+      try {
+        const verifyResponse = await fetch("http://localhost:8080/verify-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, otp: otp }),
+        });
 
-      // Start countdown
-      var interval = setInterval(function() {
-        if (self.timeLeft() > 0) {
-          self.timeLeft(self.timeLeft() - 1);
-        } else {
-          clearInterval(interval);
+        console.log("Fetch response status:", verifyResponse.status);
+
+        if (!verifyResponse.ok) {
+          const errMsg = await verifyResponse.text();
+          throw new Error(errMsg || "OTP verification failed.");
         }
-      }, 1000);
 
-      // Auto-jump logic for OTP inputs
-self.handleKeyUp = function (data, event) {
-  const input = event.target;
+        const message = await verifyResponse.text();
+        console.log("Server says:", message);
+        alert("✅ OTP verified successfully!");
 
-  // Move forward on digit entry
-  if (input.value.length === 1 && event.key !== "Backspace") {
-    const next = input.nextElementSibling;
-    if (next && next.tagName === "INPUT") {
-      next.focus();
-    }
+        const pendingUpdate = JSON.parse(localStorage.getItem("pendingUpdate"));
+        console.log("Pending update data:", pendingUpdate);
+
+        if (!pendingUpdate || !pendingUpdate.id) {
+          alert("No profile data found to update.");
+          return;
+        }
+
+        const updateResponse = await fetch(
+          `http://localhost:8080/update/${pendingUpdate.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(pendingUpdate),
+          }
+        );
+
+        console.log("Update response status:", updateResponse.status);
+
+        if (!updateResponse.ok) {
+          const updateError = await updateResponse.text();
+          throw new Error(updateError || "Profile update failed.");
+        }
+
+        const updatedUser = await updateResponse.json();
+        alert("🎉 Profile updated successfully!");
+
+        localStorage.removeItem("otpEmail");
+        localStorage.removeItem("pendingUpdate");
+
+        router.go({ path: "myprofile" });
+      } catch (err) {
+        console.error("Error during OTP verification or profile update:", err);
+        alert(err.message || "Something went wrong! Please try again.");
+      }
+    };
+
+    // 🔹 Lifecycle
+    this.connected = () => {
+      accUtils.announce("OTP Screen loaded.", "assertive");
+      document.title = "OTP Verification";
+    };
+    this.disconnected = () => {};
+    this.transitionCompleted = () => {};
   }
 
-  // Move back on backspace if empty
-  if (event.key === "Backspace" && input.value === "") {
-    const prev = input.previousElementSibling;
-    if (prev && prev.tagName === "INPUT") {
-      prev.focus();
-    }
-  }
-
-  return true;
-};
-
-
-
-      /**
-       * Optional ViewModel method invoked after the View is inserted into the
-       * document DOM.  The application can put logic that requires the DOM being
-       * attached here.
-       * This method might be called multiple times - after the View is created
-       * and inserted into the DOM and after the View is reconnected
-       * after being disconnected.
-       */
-      this.connected = () => {
-        accUtils.announce('OTPScreen page loaded.', 'assertive');
-        document.title = "OTP Screen";
-        // Implement further logic if needed
-      };
-
-
-
-      /**
-       * Optional ViewModel method invoked after the View is disconnected from the DOM.
-       */
-      this.disconnected = () => {
-        // Implement if needed
-      };
-
-      /**
-       * Optional ViewModel method invoked after transition to the new View is complete.
-       * That includes any possible animation between the old and the new View.
-       */
-      this.transitionCompleted = () => {
-        // Implement if needed
-      };
-    }
-
-    /*
-     * Returns an instance of the ViewModel providing one instance of the ViewModel. If needed,
-     * return a constructor for the ViewModel so that the ViewModel is constructed
-     * each time the view is displayed.
-     */
-    return OTPScreenViewModel;
-  }
-);
+  return OTPScreenViewModel;
+});
