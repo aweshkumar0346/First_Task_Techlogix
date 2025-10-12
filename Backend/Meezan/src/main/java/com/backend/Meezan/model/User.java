@@ -1,6 +1,14 @@
 package com.backend.Meezan.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="users")
@@ -9,35 +17,44 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private String accountTitle;
-    private String jobStatus;
-    private String dateCreationStatus;
-    private String ercEmployeeStatus;
-    private String lastLoginDetails;
-    private String dateOfBirth;
+
+    @Column(nullable = false)
+    private String fileStatus;
+
+    @Column(nullable = false)
+    private String zakatdeductionstatus;
+
+    @Column(nullable = false)
+    private LocalDate cnicexpirationdate;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime lastLoginDetails;
+
+    @Column(nullable = false)
+    private LocalDate dateOfBirth;
+
+    @Column(nullable = false)
     private String registeredHomeAddress;
+
+    @Column(nullable = false)
     private String registeredContactNumber;
+
+    @Column(nullable = false)
     private String registeredEmailAddress;
+
+    @Column(nullable = false)
     private String city;
+
+    @Column(nullable = false)
     private String country;
     //private String location;
 
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
 
     public Long getId() {
         return id;
@@ -63,43 +80,43 @@ public class User {
         this.accountTitle = accountTitle;
     }
 
-    public String getJobStatus() {
-        return jobStatus;
+    public String getFileStatus() {
+        return fileStatus;
     }
 
-    public void setJobStatus(String jobStatus) {
-        this.jobStatus = jobStatus;
+    public void setFileStatus(String fileStatus) {
+        this.fileStatus = fileStatus;
     }
 
-    public String getDateCreationStatus() {
-        return dateCreationStatus;
+    public String getZakatdeductionstatus() {
+        return zakatdeductionstatus;
     }
 
-    public void setDateCreationStatus(String dateCreationStatus) {
-        this.dateCreationStatus = dateCreationStatus;
+    public void setZakatdeductionstatus(String zakatdeductionstatus) {
+        this.zakatdeductionstatus = zakatdeductionstatus;
     }
 
-    public String getErcEmployeeStatus() {
-        return ercEmployeeStatus;
+    public LocalDate getCnicexpirationdate() {
+        return cnicexpirationdate;
     }
 
-    public void setErcEmployeeStatus(String ercEmployeeStatus) {
-        this.ercEmployeeStatus = ercEmployeeStatus;
+    public void setCnicexpirationdate(LocalDate cnicexpirationdate) {
+        this.cnicexpirationdate = cnicexpirationdate;
     }
 
-    public String getLastLoginDetails() {
+    public LocalDateTime getLastLoginDetails() {
         return lastLoginDetails;
     }
 
-    public void setLastLoginDetails(String lastLoginDetails) {
+    public void setLastLoginDetails(LocalDateTime lastLoginDetails) {
         this.lastLoginDetails = lastLoginDetails;
     }
 
-    public String getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -127,5 +144,19 @@ public class User {
         this.registeredEmailAddress = registeredEmailAddress;
     }
 
+    public String getCity() {
+        return city;
+    }
 
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 }

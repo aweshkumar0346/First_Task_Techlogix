@@ -22,6 +22,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
     self.address = ko.observable("");
     self.selectedCountry = ko.observable("");
     self.selectedCity = ko.observable("");
+    self.cnicexpirationdate = ko.observable();
     self.cnicImage = ko.observable("src/css/images/nic.svg"); // default
 
     // Country & city data
@@ -52,10 +53,32 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
         self.address(user.registeredHomeAddress || "");
         self.selectedCountry(user.country || "");
         self.selectedCity(user.city || "");
+        self.cnicexpirationdate(user.cnicexpirationdate || "");
       }
     };
 
-    // 📞 Contact Number Validation
+    // Contact Number Setup
+    self.contactNumber = ko.observable("");
+
+    // Subscribe: auto-clean + format
+    self.contactNumber.subscribe(function (newValue) {
+      // If contains any letters, keep raw input (don’t clean yet)
+      if (/[a-zA-Z]/.test(newValue)) {
+        // Don’t overwrite here, let computed handle error message
+        return;
+      }
+
+      var raw = newValue.replace(/\D/g, ""); // keep only digits
+      if (raw.length > 0) {
+        if (raw.length <= 4) {
+          self.contactNumber(raw);
+        } else {
+          self.contactNumber(raw.replace(/(\d{4})(\d{0,7})/, "$1-$2"));
+        }
+      }
+    });
+
+    // Validation: digits only + exactly 11 digits
     self.contactError = ko.computed(function () {
       var value = self.contactNumber();
 
@@ -68,6 +91,9 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
       var raw = value.replace(/\D/g, "");
       if (raw.length === 0) {
         return ""; // no error yet
+      }
+      if (raw.length < 11) {
+        return "Contact number must be exactly 11 digits";
       }
       if (raw.length > 11) {
         return "Too many digits! Must be 11 digits";
@@ -129,7 +155,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
       };
 
       try {
-        const response = await fetch("http://localhost:8080/request-otp", {
+        const response = await fetch("http://localhost:8080/api/request-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

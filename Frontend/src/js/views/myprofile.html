@@ -1,7 +1,7 @@
 <style>
   .container {
     display: flex;
-    flex-direction: column;
+   
     min-height: 100vh;
   }
 
@@ -80,7 +80,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr auto;
     gap: 15px;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* responsive columns
+    
   }
 
   .detail-item.full-span {
@@ -112,7 +112,7 @@
     gap: 0px; /* spacing only between name & account title */
   }
   .detail-item.full-span {
-  grid-column: span 1; /* take full width automatically on small screens */
+  grid-column: 1 / -1; /* spans across all grid columns */
 }
 
   .detail-box .name {
@@ -184,6 +184,11 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         margin: 1rem;
       }
+
+      .greencolor .detail-value {
+        color: green;
+        font-weight: bold;
+      }
 </style>
 
 <div class="container">
@@ -214,19 +219,19 @@
 
           <div class="detail-row">
 
-            <div class="detail-item">
-              <div class="detail-label">Job Status</div>
-              <div class="detail-value" data-bind="text: jobStatus"></div>
+            <div class="detail-item greencolor">
+              <div class="detail-label">Filer Status</div>
+              <div class="detail-value" data-bind="text: fileStatus"></div>
+            </div>
+
+            <div class="detail-item greencolor">
+              <div class="detail-label">Zakat Deduction Status</div>
+              <div class="detail-value" data-bind="text: zakatdeductionstatus"></div>
             </div>
 
             <div class="detail-item">
-              <div class="detail-label">Date Creation Status</div>
-              <div class="detail-value" data-bind="text: dateCreationStatus"></div>
-            </div>
-
-            <div class="detail-item">
-              <div class="detail-label">ERC Employee Status</div>
-              <div class="detail-value" data-bind="text: ercEmployeeStatus"></div>
+              <div class="detail-label">CNIC Expiration Date</div>
+              <div class="detail-value" data-bind="text: cnicexpirationdate"></div>
             </div>
 
             <div class="detail-item">

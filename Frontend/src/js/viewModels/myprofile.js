@@ -3,12 +3,12 @@ function(ko, accUtils) {
   function MyProfileViewModel(params) {
     var self = this;
 
-    self.id = ko.observable(5); // 🟢 hardcoded user ID (for now)
+    self.id = ko.observable(1); // 🟢 hardcoded user ID (for now)
     self.name = ko.observable();
     self.accountTitle = ko.observable();
-    self.jobStatus = ko.observable();
-    self.dateCreationStatus = ko.observable();
-    self.ercEmployeeStatus = ko.observable();
+    self.fileStatus = ko.observable();
+    self.zakatdeductionstatus = ko.observable();
+    self.cnicexpirationdate = ko.observable();
     self.lastLoginDetails = ko.observable();
     self.dateOfBirth = ko.observable();
     self.registeredHomeAddress = ko.observable();
@@ -28,7 +28,7 @@ function(ko, accUtils) {
 
     self.loadProfile = async function () {
       // Add timestamp to prevent browser caching
-      const apiUrl = `http://localhost:8080/byid/${self.id()}?t=${new Date().getTime()}`;
+      const apiUrl = `http://localhost:8080/api/byid/${self.id()}?t=${new Date().getTime()}`;
 
       //const apiUrl = `http://localhost:8080/byid/${self.id()}`;
       console.log("Fetching profile for ID:", self.id());
@@ -41,9 +41,9 @@ function(ko, accUtils) {
         // ✅ Populate observables
         self.name(profile.name);
         self.accountTitle(profile.accountTitle);
-        self.jobStatus(profile.jobStatus);
-        self.dateCreationStatus(profile.dateCreationStatus);
-        self.ercEmployeeStatus(profile.ercEmployeeStatus);
+        self.fileStatus(profile.fileStatus);
+        self.zakatdeductionstatus(profile.zakatdeductionstatus);
+        self.cnicexpirationdate(profile.cnicexpirationdate);
         self.lastLoginDetails(profile.lastLoginDetails);
         self.dateOfBirth(profile.dateOfBirth);
         self.registeredHomeAddress(profile.registeredHomeAddress);
@@ -77,8 +77,9 @@ function(ko, accUtils) {
     this.connected = () => {
       accUtils.announce('My Profile page loaded.', 'assertive');
       document.title = "My Profile";
-      self.loadProfile();
+      
     };
+    self.loadProfile();
   }
 
   return MyProfileViewModel;

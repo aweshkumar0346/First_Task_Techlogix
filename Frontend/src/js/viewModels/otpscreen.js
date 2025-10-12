@@ -25,7 +25,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
     ]);
 
     // 🔹 Timer (5 minutes)
-    self.timeLeft = ko.observable(300); // 5 min = 300 sec
+    self.timeLeft = ko.observable(120); // 5 min = 300 sec
     self.formattedTime = ko.computed(() => {
       var minutes = Math.floor(self.timeLeft() / 60);
       var seconds = self.timeLeft() % 60;
@@ -84,7 +84,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
       }
 
       try {
-        const verifyResponse = await fetch("http://localhost:8080/verify-otp", {
+        const verifyResponse = await fetch("http://localhost:8080/api/verify-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: email, otp: otp }),
@@ -110,7 +110,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
         }
 
         const updateResponse = await fetch(
-          `http://localhost:8080/update/${pendingUpdate.id}`,
+          `http://localhost:8080/api/update/${pendingUpdate.id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
