@@ -1,7 +1,7 @@
 <style>
   .container {
     display: flex;
-   
+
     min-height: 100vh;
   }
 
@@ -80,7 +80,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr auto;
     gap: 15px;
-    
   }
 
   .detail-item.full-span {
@@ -112,8 +111,8 @@
     gap: 0px; /* spacing only between name & account title */
   }
   .detail-item.full-span {
-  grid-column: 1 / -1; /* spans across all grid columns */
-}
+    grid-column: 1 / -1; /* spans across all grid columns */
+  }
 
   .detail-box .name {
     font-size: 16px;
@@ -171,24 +170,66 @@
   }
 
   .content-body {
-        flex: 1;
-        
-        overflow-y: auto;
-        background: #beb6b6;
-      }
+    flex: 1;
 
-      .content-card {
-        background: rgb(255, 255, 255);
-        border-radius: 8px;
-        padding: 2rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin: 1rem;
-      }
+    overflow-y: auto;
+    background: #beb6b6;
+  }
 
-      .greencolor .detail-value {
-        color: green;
-        font-weight: bold;
-      }
+  .content-card {
+    background: rgb(255, 255, 255);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 1rem;
+  }
+
+  .greencolor .detail-value {
+    color: green;
+    font-weight: bold;
+  }
+
+  .update-success {
+    background-color: #28a745; /* green */
+    color: white;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease;
+  }
+
+  .update-success .checkmark {
+    background: white;
+    color: #28a745;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <div class="container">
@@ -204,98 +245,116 @@
     <div class="content-body">
       <div class="content-card">
         <div class="content">
-      <div class="profile-header">
-        <h2>My Profile</h2>
-      </div>
-
-      <div class="profile-details">
-
-        <div class="detail-box">
-
-          <div class="box-header">
-            <p class="name" data-bind="text: name"></p>
-            <p class="account-title" data-bind="text: accountTitle"></p>
+          <div class="profile-header">
+            <h2>My Profile</h2>
           </div>
 
-          <div class="detail-row">
+          <div class="profile-details">
+            <div class="detail-box">
+              <div class="box-header">
+                <p class="name" data-bind="text: name"></p>
+                <p class="account-title" data-bind="text: accountTitle"></p>
+              </div>
 
-            <div class="detail-item greencolor">
-              <div class="detail-label">Filer Status</div>
-              <div class="detail-value" data-bind="text: fileStatus"></div>
+              <div class="detail-row">
+                <div class="detail-item greencolor">
+                  <div class="detail-label">Filer Status</div>
+                  <div class="detail-value" data-bind="text: fileStatus"></div>
+                </div>
+
+                <div class="detail-item greencolor">
+                  <div class="detail-label">Zakat Deduction Status</div>
+                  <div
+                    class="detail-value"
+                    data-bind="text: zakatdeductionstatus"
+                  ></div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-label">CNIC Expiration Date</div>
+                  <div
+                    class="detail-value"
+                    data-bind="text: cnicexpirationdate"
+                  ></div>
+                </div>
+
+                <div class="detail-item">
+                  <button class="btn btn-primary">Update CNIC</button>
+                </div>
+              </div>
             </div>
 
-            <div class="detail-item greencolor">
-              <div class="detail-label">Zakat Deduction Status</div>
-              <div class="detail-value" data-bind="text: zakatdeductionstatus"></div>
-            </div>
+            <div class="detail-box">
+              <!-- ✅ Success Message Bar -->
+              <div id="update-success" class="update-success hidden">
+                <span class="checkmark">✔</span>
+                Personal Details Updated Successfully!
+              </div>
 
-            <div class="detail-item">
-              <div class="detail-label">CNIC Expiration Date</div>
-              <div class="detail-value" data-bind="text: cnicexpirationdate"></div>
-            </div>
+              <div class="detail-row">
+                <div class="detail-item">
+                  <div class="detail-label">Last Login Details</div>
+                  <div
+                    class="detail-value"
+                    data-bind="text: lastLoginDetails"
+                  ></div>
+                </div>
 
-            <div class="detail-item">
-              <button class="btn btn-primary">Update CNIC</button>
-            </div>
-            
-          </div>
-        </div>
+                <div class="detail-item">
+                  <div class="detail-label">Date of Birth</div>
+                  <div class="detail-value" data-bind="text: dateOfBirth"></div>
+                </div>
 
-        <div class="detail-box">
+                <div class="detail-item">
+                  <div class="detail-label"></div>
+                  <div class="detail-value"></div>
+                </div>
+              </div>
 
-          <div class="detail-row">
+              <div class="detail-row">
+                <div class="detail-item full-span">
+                  <div class="detail-label">Registered Home Address</div>
+                  <div
+                    class="detail-value"
+                    data-bind="text: registeredHomeAddress"
+                  ></div>
+                </div>
+              </div>
 
-            <div class="detail-item">
-              <div class="detail-label">Last Login Details</div>
-              <div class="detail-value" data-bind="text: lastLoginDetails"></div>
-            </div>
+              <div class="detail-row">
+                <div class="detail-item">
+                  <div class="detail-label">Registered Contact Number</div>
+                  <div
+                    class="detail-value"
+                    data-bind="text: registeredContactNumber"
+                  ></div>
+                </div>
 
-            <div class="detail-item">
-              <div class="detail-label">Date of Birth</div>
-              <div class="detail-value" data-bind="text: dateOfBirth"></div>
-            </div>
+                <div class="detail-item">
+                  <div class="detail-label">Registered Email Address</div>
+                  <div
+                    class="detail-value"
+                    data-bind="text: registeredEmailAddress"
+                  ></div>
+                </div>
 
-            <div class="detail-item">
-              <div class="detail-label"></div>
-              <div class="detail-value"></div>
-            </div>
-
-          </div>
-
-          <div class="detail-row">
-            <div class="detail-item full-span">
-              <div class="detail-label">Registered Home Address</div>
-              <div class="detail-value" data-bind="text: registeredHomeAddress">
+                <div class="detail-item">
+                  <div class="detail-label">Location</div>
+                  <div
+                    class="detail-value"
+                    data-bind="text: formattedLocation"
+                  ></div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="detail-row">
-
-            <div class="detail-item">
-              <div class="detail-label">Registered Contact Number</div>
-              <div class="detail-value" data-bind="text: registeredContactNumber"></div>
-            </div>
-
-            <div class="detail-item">
-              <div class="detail-label">Registered Email Address</div>
-              <div class="detail-value" data-bind="text: registeredEmailAddress"></div>
-            </div>
-
-            <div class="detail-item">
-              <div class="detail-label">Location</div>
-              <div class="detail-value" data-bind="text: formattedLocation"></div>
-            </div>
-
+          <div class="action-buttons">
+            <button class="btn btn-secondary">Back</button>
+            <button class="btn btn-primary" data-bind="click:move">
+              Edit Personal Details
+            </button>
           </div>
-        </div>
-      </div>
-
-      <div class="action-buttons">
-        <button class="btn btn-secondary">Back</button>
-        <button class="btn btn-primary" data-bind="click:move">Edit Personal Details</button>
-      </div>
-
         </div>
       </div>
     </div>

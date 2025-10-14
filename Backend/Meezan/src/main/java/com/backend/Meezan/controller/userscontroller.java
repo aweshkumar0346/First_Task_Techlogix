@@ -1,16 +1,16 @@
 package com.backend.Meezan.controller;
 
+import com.backend.Meezan.model.OtpStore;
 import com.backend.Meezan.model.User;
+import com.backend.Meezan.repo.otpstorerepo;
 import com.backend.Meezan.repo.usersrepo;
 import com.backend.Meezan.service.userservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -23,15 +23,30 @@ public class userscontroller {
     @Autowired
     private usersrepo repo;
 
-    // Temporary store for OTP
-    private Map<String, String> otpStore = new HashMap<>();
+    @Autowired
+    private otpstorerepo otprepo;
 
-    /** STEP 1️⃣: Generate OTP when edit form submitted */
+
+    /** STEP 1️⃣: Generate OTP and SAVE in Database (keep record, don’t delete) */
     @PostMapping("/request-otp")
     public ResponseEntity<Map<String, String>> requestOtp(@RequestBody User user) {
 
         String otp = String.format("%06d", new Random().nextInt(999999));
-        otpStore.put(user.getRegisteredEmailAddress(), otp);
+
+        // Check if OTP already exists for this email - update or create
+        Optional<OtpStore> existingOtp = otprepo.findByEmail(user.getRegisteredEmailAddress());
+        OtpStore otpEntity;
+
+        if(existingOtp.isPresent()){
+            otpEntity = existingOtp.get();
+            otpEntity.setOtp(otp);
+            otpEntity.setCreatedAt(LocalDateTime.now());
+        }else{
+            otpEntity = new OtpStore(user.getRegisteredEmailAddress(),otp);
+        }
+
+        otprepo.save(otpEntity);
+
 
         // Simulate SMS/Email send
         System.out.println("Generated OTP for " + user.getRegisteredEmailAddress() + ": " + otp);
@@ -42,25 +57,24 @@ public class userscontroller {
         return ResponseEntity.ok(response);
     }
 
-    /** STEP 2️⃣: Verify OTP only (no DB save here) */
+    /** STEP 2️⃣: Verify OTP (without deleting from DB) */
     @PostMapping("/verify-otp")
     public ResponseEntity<String> verifyOTP(@RequestBody Map<String, String> body) {
         String email = body.get("email");
         String enteredOTP = body.get("otp");
 
-        String storedOTP = otpStore.get(email);
+        Optional<OtpStore> otpRecord = otprepo.findByEmail(email);
 
         System.out.println("=== 🔍 OTP Verification Debug ===");
         System.out.println("Email received: " + email);
         System.out.println("Entered OTP: " + enteredOTP);
-        System.out.println("Stored OTP: " + storedOTP);
+        System.out.println("Stored OTP: " + (otpRecord.isPresent() ? otpRecord.get().getOtp() : "null"));
         System.out.println("===============================");
 
-        if (storedOTP != null && storedOTP.equals(enteredOTP)) {
-            otpStore.remove(email);
+        if(otpRecord.isPresent() && otpRecord.get().getOtp().equals(enteredOTP)){
             System.out.println("✅ OTP verified successfully for " + email);
             return ResponseEntity.ok("OTP verified successfully!");
-        } else {
+        }else {
             System.out.println("❌ Invalid or expired OTP for " + email);
             return ResponseEntity.status(400).body("Invalid or expired OTP");
         }
@@ -81,8 +95,13 @@ public class userscontroller {
     }
 
     @PostMapping("/create")
-    public User createUser(@RequestBody User user) {
-        return service.createuser(user);
+    public ResponseEntity<?> createUser(@RequestBody User user) {
+        try {
+            User savedUser = service.createuser(user);
+            return ResponseEntity.ok(savedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/update/{id}")

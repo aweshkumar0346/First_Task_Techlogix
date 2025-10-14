@@ -42,20 +42,57 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
         : [];
     });
 
-    // 📥 Load data from localStorage (auto-fill)
     self.loadFromLocalStorage = function () {
-      const storedUser = localStorage.getItem("currentUser");
-      if (storedUser) {
-        const user = JSON.parse(storedUser);
-        self.id(user.id);
-        self.contactNumber(user.registeredContactNumber || "");
-        self.email(user.registeredEmailAddress || "");
-        self.address(user.registeredHomeAddress || "");
-        self.selectedCountry(user.country || "");
-        self.selectedCity(user.city || "");
-        self.cnicexpirationdate(user.cnicexpirationdate || "");
+      // 🟢 First, check if there’s a pending edit (unsaved changes)
+      const pending = localStorage.getItem("pendingUpdate");
+      const current = localStorage.getItem("currentUser");
+
+      if (pending) {
+        console.log("📦 Loading pending update data (unsaved edits)...");
+        try {
+          const data = JSON.parse(pending);
+          self.id(data.id);
+          self.contactNumber(data.registeredContactNumber || "");
+          self.email(data.registeredEmailAddress || "");
+          self.address(data.registeredHomeAddress || "");
+          self.selectedCountry(data.country || "");
+          self.selectedCity(data.city || "");
+          // keep CNIC expiry date from current profile if available
+          if (current) {
+            const user = JSON.parse(current);
+            self.cnicexpirationdate(user.cnicexpirationdate || "");
+          }
+          return;
+        } catch (e) {
+          console.error("⚠️ Failed to parse pendingUpdate:", e);
+        }
+      }
+
+      // 🟢 Otherwise, load the main saved profile data
+      if (current) {
+        console.log("📦 Loading current user data (from profile)...");
+        try {
+          const user = JSON.parse(current);
+          self.id(user.id);
+          self.contactNumber(user.registeredContactNumber || "");
+          self.email(user.registeredEmailAddress || "");
+          self.address(user.registeredHomeAddress || "");
+          self.selectedCountry(user.country || "");
+          self.selectedCity(user.city || "");
+          self.cnicexpirationdate(user.cnicexpirationdate || "");
+        } catch (e) {
+          console.error("⚠️ Failed to parse currentUser:", e);
+        }
+      } else {
+        console.warn("⚠️ No local profile data found in storage.");
       }
     };
+
+    self.formattedId = ko.computed(function () {
+      const raw = String(self.id() || "").trim();
+      if (raw.length !== 13) return raw;
+      return `${raw.slice(0, 5)}-${raw.slice(5, 12)}-${raw.slice(12)}`;
+    });
 
     // Contact Number Setup
     self.contactNumber = ko.observable("");
@@ -114,7 +151,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
       var value = self.address().trim();
       if (!value) return "";
       if (value.length < 25 || value.length > 30)
-        return "Address must be 25–30 characters long";
+        return "Address should have 25-30 characters ";
       return "";
     });
 

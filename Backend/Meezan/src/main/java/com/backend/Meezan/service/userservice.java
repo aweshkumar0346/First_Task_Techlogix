@@ -24,6 +24,16 @@ public class userservice {
     }
 
     public User createuser(User user){
+
+        if (user.getId() == null) {
+            throw new IllegalArgumentException("User CNIC must be provided manually.");
+        }
+
+        // 2️⃣ Check if ID already exists (uniqueness)
+        if (repo.existsById(user.getId())) {
+            throw new IllegalArgumentException("User CNIC already exists.");
+        }
+
         return repo.save(user);
     }
 }

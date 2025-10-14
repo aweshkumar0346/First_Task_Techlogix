@@ -1,9 +1,8 @@
-define(['knockout', '../accUtils'], 
-function(ko, accUtils) {
+define(["knockout", "../accUtils"], function (ko, accUtils) {
   function MyProfileViewModel(params) {
     var self = this;
 
-    self.id = ko.observable(1); // 🟢 hardcoded user ID (for now)
+    self.id = ko.observable(4440148467777); // 🟢 hardcoded user ID (for now)
     self.name = ko.observable();
     self.accountTitle = ko.observable();
     self.fileStatus = ko.observable();
@@ -20,10 +19,10 @@ function(ko, accUtils) {
 
     // ✅ Computed observable to show “City, Country”
     self.formattedLocation = ko.computed(() => {
-      const city = self.city() || '';
-      const country = self.country() || '';
+      const city = self.city() || "";
+      const country = self.country() || "";
       if (city && country) return `${city}, ${country}`;
-      else return city || country || 'N/A';
+      else return city || country || "N/A";
     });
 
     self.loadProfile = async function () {
@@ -37,6 +36,7 @@ function(ko, accUtils) {
         if (!response.ok) throw new Error("Failed to fetch profile");
 
         const profile = await response.json();
+        console.log('profile', profile)
 
         // ✅ Populate observables
         self.name(profile.name);
@@ -56,28 +56,47 @@ function(ko, accUtils) {
         // ✅ Store cleanly for edit profile page
         localStorage.removeItem("currentUser");
         localStorage.setItem("currentUser", JSON.stringify(profile));
-
       } catch (error) {
         console.error("Error fetching profile data:", error);
       }
-
-      
     };
 
     // Subscribe to ID changes to automatically reload profile
     self.id.subscribe(() => {
       self.loadProfile();
     });
-    
+
     const { router } = params;
     self.move = () => {
       router.go({ path: "editprofile" });
     };
 
     this.connected = () => {
-      accUtils.announce('My Profile page loaded.', 'assertive');
+      accUtils.announce("My Profile page loaded.", "assertive");
       document.title = "My Profile";
-      
+
+      // ✅ Wait a short time to ensure DOM is ready
+      setTimeout(() => {
+        if (localStorage.getItem("showProfileUpdateSuccess") === "true") {
+          const successBar = document.getElementById("update-success");
+          if (successBar) {
+            successBar.classList.remove("hidden");
+
+            // Auto-hide after 2 seconds
+            setTimeout(() => {
+              successBar.classList.add("fade-out");
+              setTimeout(() => {
+                successBar.classList.add("hidden");
+                successBar.classList.remove("fade-out");
+              }, 500); // fade-out duration
+            }, 2000);
+
+            localStorage.removeItem("showProfileUpdateSuccess");
+          } else {
+            console.warn("⚠️ update-success element not found in DOM.");
+          }
+        }
+      }, 300);
     };
     self.loadProfile();
   }

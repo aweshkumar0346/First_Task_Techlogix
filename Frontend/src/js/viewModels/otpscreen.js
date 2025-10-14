@@ -84,11 +84,14 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
       }
 
       try {
-        const verifyResponse = await fetch("http://localhost:8080/api/verify-otp", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email, otp: otp }),
-        });
+        const verifyResponse = await fetch(
+          "http://localhost:8080/api/verify-otp",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email, otp: otp }),
+          }
+        );
 
         console.log("Fetch response status:", verifyResponse.status);
 
@@ -128,13 +131,21 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
         const updatedUser = await updateResponse.json();
         alert("🎉 Profile updated successfully!");
 
+        localStorage.setItem("showProfileUpdateSuccess", "true");
         localStorage.removeItem("otpEmail");
         localStorage.removeItem("pendingUpdate");
 
         router.go({ path: "myprofile" });
       } catch (err) {
-        console.error("Error during OTP verification or profile update:", err);
-        alert(err.message || "Something went wrong! Please try again.");
+        console.error("❌ OTP verification failed or error:", err);
+        alert("OTP verification failed or was cancelled.");
+
+        // 🧹 Clean up temporary data — don’t apply edits
+        localStorage.removeItem("otpEmail");
+        localStorage.removeItem("pendingUpdate");
+
+        // 🔙 Go back to MyProfile (original data)
+        router.go({ path: "myprofile" });
       }
     };
 
