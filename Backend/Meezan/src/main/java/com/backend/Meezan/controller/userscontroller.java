@@ -2,8 +2,10 @@ package com.backend.Meezan.controller;
 
 import com.backend.Meezan.model.OtpStore;
 import com.backend.Meezan.model.User;
+import com.backend.Meezan.model.UserSummary;
 import com.backend.Meezan.repo.otpstorerepo;
 import com.backend.Meezan.repo.usersrepo;
+import com.backend.Meezan.repo.usersummaryrepo;
 import com.backend.Meezan.service.userservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,8 @@ public class userscontroller {
     @Autowired
     private otpstorerepo otprepo;
 
+    @Autowired
+    private usersummaryrepo summaryrepo;
 
     /** STEP 1️⃣: Generate OTP and SAVE in Database (keep record, don’t delete) */
     @PostMapping("/request-otp")
@@ -145,6 +149,15 @@ public class userscontroller {
             e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
+    }
+
+    @GetMapping("/usersummary/{id}")
+    public ResponseEntity<?> getUserSummary(@PathVariable Long id){
+        UserSummary summary = summaryrepo.findByIdValue(id);
+        if(summary == null){
+            return ResponseEntity.status(404).body("No summary found for ID: " + id);
+        }
+        return ResponseEntity.ok(summary);
     }
 
 }
