@@ -33,28 +33,22 @@ public class userscontroller {
 
         String otp = String.format("%06d", new Random().nextInt(999999));
 
-        // Check if OTP already exists for this email - update or create
-        Optional<OtpStore> existingOtp = otprepo.findByEmail(user.getRegisteredEmailAddress());
-        OtpStore otpEntity;
+        try{
+            // 🔹 Call PostgreSQL stored procedure instead of JPA save()
+            otprepo.saveOrUpdateOtp(user.getRegisteredEmailAddress(), otp);
 
-        if(existingOtp.isPresent()){
-            otpEntity = existingOtp.get();
-            otpEntity.setOtp(otp);
-            otpEntity.setCreatedAt(LocalDateTime.now());
-        }else{
-            otpEntity = new OtpStore(user.getRegisteredEmailAddress(),otp);
+            // Simulate SMS/Email send
+            System.out.println("Generated OTP for " + user.getRegisteredEmailAddress() + ": " + otp);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "OTP sent successfully to " + user.getRegisteredEmailAddress());
+            response.put("email", user.getRegisteredEmailAddress());
+            return ResponseEntity.ok(response);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Failed to save OTP: " + e.getMessage()));
         }
-
-        otprepo.save(otpEntity);
-
-
-        // Simulate SMS/Email send
-        System.out.println("Generated OTP for " + user.getRegisteredEmailAddress() + ": " + otp);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "OTP sent successfully to " + user.getRegisteredEmailAddress());
-        response.put("email", user.getRegisteredEmailAddress());
-        return ResponseEntity.ok(response);
     }
 
     /** STEP 2️⃣: Verify OTP (without deleting from DB) */
@@ -71,12 +65,20 @@ public class userscontroller {
         System.out.println("Stored OTP: " + (otpRecord.isPresent() ? otpRecord.get().getOtp() : "null"));
         System.out.println("===============================");
 
-        if(otpRecord.isPresent() && otpRecord.get().getOtp().equals(enteredOTP)){
-            System.out.println("✅ OTP verified successfully for " + email);
-            return ResponseEntity.ok("OTP verified successfully!");
-        }else {
-            System.out.println("❌ Invalid or expired OTP for " + email);
-            return ResponseEntity.status(400).body("Invalid or expired OTP");
+        try {
+            Boolean isValid = otprepo.verifyOtp(email, enteredOTP);
+
+            if (Boolean.TRUE.equals(isValid)) {
+                System.out.println("✅ OTP verified successfully for " + email);
+                return ResponseEntity.ok("OTP verified successfully!");
+            } else {
+                System.out.println("❌ Invalid or expired OTP for " + email);
+                return ResponseEntity.status(400).body("Invalid or expired OTP");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
         }
     }
 
@@ -97,25 +99,52 @@ public class userscontroller {
     @PostMapping("/create")
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
-            User savedUser = service.createuser(user);
-            return ResponseEntity.ok(savedUser);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            repo.createUser(
+                    user.getId(),
+                    user.getName(),
+                    user.getAccountTitle(),
+                    user.getFileStatus(),
+                    user.getZakatdeductionstatus(),
+                    user.getCnicexpirationdate(),
+                    user.getLastLoginDetails(),
+                    user.getDateOfBirth(),
+                    user.getRegisteredHomeAddress(),
+                    user.getRegisteredContactNumber(),
+                    user.getRegisteredEmailAddress(),
+                    user.getCity(),
+                    user.getCountry()
+            );
+
+            return ResponseEntity.ok(user);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Failed to create user: " + e.getMessage()));
         }
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updateUser) {
-        User existing = repo.findById(id).orElse(null);
-        if (existing == null) return ResponseEntity.notFound().build();
+        try {
+            repo.updateUserPartial(
+                    id,
+                    updateUser.getRegisteredContactNumber(),
+                    updateUser.getRegisteredEmailAddress(),
+                    updateUser.getRegisteredHomeAddress(),
+                    updateUser.getCity(),
+                    updateUser.getCountry()
+            );
 
-        existing.setRegisteredContactNumber(updateUser.getRegisteredContactNumber());
-        existing.setRegisteredEmailAddress(updateUser.getRegisteredEmailAddress());
-        existing.setRegisteredHomeAddress(updateUser.getRegisteredHomeAddress());
-        existing.setCity(updateUser.getCity());
-        existing.setCountry(updateUser.getCountry());
+            // Return updated object (optional: fetch from DB for most accurate data)
+            User existing = repo.findById(id).orElse(null);
+            if (existing == null) return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(existing);
 
-        repo.save(existing);
-        return ResponseEntity.ok(existing);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
     }
+
 }
