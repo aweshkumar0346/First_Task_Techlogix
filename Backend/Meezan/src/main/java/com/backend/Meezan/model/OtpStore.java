@@ -1,11 +1,10 @@
 package com.backend.Meezan.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name ="otpstore")
+@Table(name = "otpstore")
 public class OtpStore {
 
     @Id
@@ -19,11 +18,9 @@ public class OtpStore {
     private String otp;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public OtpStore() {
-        this.createdAt = LocalDateTime.now();
-    }
+    public OtpStore() {}
 
     public OtpStore(String email, String otp) {
         this.email = email;

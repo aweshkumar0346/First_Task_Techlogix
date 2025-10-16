@@ -107,13 +107,13 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
         const pendingUpdate = JSON.parse(localStorage.getItem("pendingUpdate"));
         console.log("Pending update data:", pendingUpdate);
 
-        if (!pendingUpdate || !pendingUpdate.id) {
+        if (!pendingUpdate || !pendingUpdate.cnic) {
           alert("No profile data found to update.");
           return;
         }
 
         const updateResponse = await fetch(
-          `http://localhost:8080/api/update/${pendingUpdate.id}`,
+          `http://localhost:8080/api/update/${pendingUpdate.cnic}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

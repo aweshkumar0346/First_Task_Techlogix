@@ -2,22 +2,26 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
   function MyProfileViewModel(params) {
     var self = this;
 
-    self.id = ko.observable(4440148467777); // 🟢 hardcoded user ID (for now)
+    // 🟢 Use CNIC as primary ID (matches backend)
+    self.cnic = ko.observable(3265874856414);
+
+    // User fields
     self.name = ko.observable();
-    self.accountTitle = ko.observable();
-    self.fileStatus = ko.observable();
-    self.zakatdeductionstatus = ko.observable();
-    self.cnicexpirationdate = ko.observable();
-    self.lastLoginDetails = ko.observable();
     self.dateOfBirth = ko.observable();
     self.registeredHomeAddress = ko.observable();
     self.registeredContactNumber = ko.observable();
     self.registeredEmailAddress = ko.observable();
-    //self.location = ko.observable();
     self.city = ko.observable();
     self.country = ko.observable();
+    self.cnicExpirationDate = ko.observable();
+    self.lastLoginDetails = ko.observable();
 
-    // ✅ Computed observable to show “City, Country”
+    // Account fields
+    self.accountTitle = ko.observable();
+    self.fileStatus = ko.observable();
+    self.zakatDeductionStatus = ko.observable();
+
+    // ✅ Computed: show "City, Country"
     self.formattedLocation = ko.computed(() => {
       const city = self.city() || "";
       const country = self.country() || "";
@@ -25,49 +29,57 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
       else return city || country || "N/A";
     });
 
+    /** ✅ Load profile from backend */
     self.loadProfile = async function () {
-      // Add timestamp to prevent browser caching
-      const apiUrl = `http://localhost:8080/api/byid/${self.id()}?t=${new Date().getTime()}`;
+      const apiUrl = `http://localhost:8080/api/bycnic/${self.cnic()}?t=${new Date().getTime()}`;
+      console.log("Fetching profile for CNIC:", self.cnic());
 
-      //const apiUrl = `http://localhost:8080/byid/${self.id()}`;
-      console.log("Fetching profile for ID:", self.id());
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error("Failed to fetch profile");
 
         const profile = await response.json();
-        console.log('profile', profile)
+        console.log("profile", profile);
 
-        // ✅ Populate observables
+        // ✅ Populate user details
         self.name(profile.name);
-        self.accountTitle(profile.accountTitle);
-        self.fileStatus(profile.fileStatus);
-        self.zakatdeductionstatus(profile.zakatdeductionstatus);
-        self.cnicexpirationdate(profile.cnicexpirationdate);
-        self.lastLoginDetails(profile.lastLoginDetails);
         self.dateOfBirth(profile.dateOfBirth);
         self.registeredHomeAddress(profile.registeredHomeAddress);
         self.registeredContactNumber(profile.registeredContactNumber);
         self.registeredEmailAddress(profile.registeredEmailAddress);
-        //self.location(profile.location);
         self.city(profile.city);
         self.country(profile.country);
+        self.cnicExpirationDate(profile.cnicExpirationDate);
+        self.lastLoginDetails(profile.lastLoginDetails);
 
-        // ✅ Store cleanly for edit profile page
-        localStorage.removeItem("currentUser");
+        // ✅ Populate account (take first if multiple)
+        if (profile.accounts && profile.accounts.length > 0) {
+          const account = profile.accounts[0];
+          self.accountTitle(account.accountTitle);
+          self.fileStatus(account.fileStatus);
+          self.zakatDeductionStatus(account.zakatDeductionStatus);
+        }
+
+        // ✅ Store for later use
         localStorage.setItem("currentUser", JSON.stringify(profile));
       } catch (error) {
         console.error("Error fetching profile data:", error);
       }
     };
 
-    // Subscribe to ID changes to automatically reload profile
-    self.id.subscribe(() => {
+    // Auto reload when CNIC changes
+    self.cnic.subscribe(() => {
       self.loadProfile();
     });
 
     const { router } = params;
     self.move = () => {
+      const currentUser = localStorage.getItem("currentUser");
+  if (!currentUser) {
+    alert("Profile not loaded yet, please wait a moment.");
+    return;
+  }
+      // 🟢 Ensure the latest profile data is saved before navigatio
       router.go({ path: "editprofile" });
     };
 
@@ -75,20 +87,19 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
       accUtils.announce("My Profile page loaded.", "assertive");
       document.title = "My Profile";
 
-      // ✅ Wait a short time to ensure DOM is ready
+      // ✅ Small UI success toast handler
       setTimeout(() => {
         if (localStorage.getItem("showProfileUpdateSuccess") === "true") {
           const successBar = document.getElementById("update-success");
           if (successBar) {
             successBar.classList.remove("hidden");
 
-            // Auto-hide after 2 seconds
             setTimeout(() => {
               successBar.classList.add("fade-out");
               setTimeout(() => {
                 successBar.classList.add("hidden");
                 successBar.classList.remove("fade-out");
-              }, 500); // fade-out duration
+              }, 500);
             }, 2000);
 
             localStorage.removeItem("showProfileUpdateSuccess");
@@ -98,6 +109,8 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
         }
       }, 300);
     };
+
+    // ✅ Initial load
     self.loadProfile();
   }
 

@@ -8,13 +8,15 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface otpstorerepo extends JpaRepository<OtpStore,Long> {
+public interface OtpStoreRepo extends JpaRepository<OtpStore, Long> {
+
     Optional<OtpStore> findByEmail(String email);
 
+    // ✅ Stored procedure for saving or updating OTP
     @Procedure(procedureName = "sp_save_or_update_otp")
     void saveOrUpdateOtp(@Param("p_email") String email, @Param("p_otp") String otp);
 
-    // 🔹 New: Call sp_verify_otp function
+    // ✅ Function to verify OTP
     @Query(value = "SELECT sp_verify_otp(:email, :otp)", nativeQuery = true)
     Boolean verifyOtp(@Param("email") String email, @Param("otp") String otp);
 }

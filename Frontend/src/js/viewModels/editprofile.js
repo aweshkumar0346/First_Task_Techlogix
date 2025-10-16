@@ -16,13 +16,13 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
     };
 
     // Observables (form fields)
-    self.id = ko.observable();
+    self.cnic = ko.observable();
     self.contactNumber = ko.observable("");
     self.email = ko.observable("");
     self.address = ko.observable("");
     self.selectedCountry = ko.observable("");
     self.selectedCity = ko.observable("");
-    self.cnicexpirationdate = ko.observable();
+    self.cnicExpirationDate = ko.observable();
     self.cnicImage = ko.observable("src/css/images/nic.svg"); // default
 
     // Country & city data
@@ -51,7 +51,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
         console.log("📦 Loading pending update data (unsaved edits)...");
         try {
           const data = JSON.parse(pending);
-          self.id(data.id);
+          self.cnic(data.cnic);
           self.contactNumber(data.registeredContactNumber || "");
           self.email(data.registeredEmailAddress || "");
           self.address(data.registeredHomeAddress || "");
@@ -60,7 +60,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
           // keep CNIC expiry date from current profile if available
           if (current) {
             const user = JSON.parse(current);
-            self.cnicexpirationdate(user.cnicexpirationdate || "");
+            self.cnicExpirationDate(user.cnicExpirationDate || "");
           }
           return;
         } catch (e) {
@@ -73,13 +73,13 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
         console.log("📦 Loading current user data (from profile)...");
         try {
           const user = JSON.parse(current);
-          self.id(user.id);
+          self.cnic(user.cnic);
           self.contactNumber(user.registeredContactNumber || "");
           self.email(user.registeredEmailAddress || "");
           self.address(user.registeredHomeAddress || "");
           self.selectedCountry(user.country || "");
           self.selectedCity(user.city || "");
-          self.cnicexpirationdate(user.cnicexpirationdate || "");
+          self.cnicExpirationDate(user.cnicExpirationDate || "");
         } catch (e) {
           console.error("⚠️ Failed to parse currentUser:", e);
         }
@@ -89,7 +89,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
     };
 
     self.formattedId = ko.computed(function () {
-      const raw = String(self.id() || "").trim();
+      const raw = String(self.cnic() || "").trim();
       if (raw.length !== 13) return raw;
       return `${raw.slice(0, 5)}-${raw.slice(5, 12)}-${raw.slice(12)}`;
     });
@@ -183,7 +183,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
       }
 
       const payload = {
-        id: self.id(),
+        cnic: self.cnic(),
         registeredContactNumber: self.contactNumber(),
         registeredEmailAddress: self.email(),
         registeredHomeAddress: self.address(),

@@ -1,40 +1,21 @@
 package com.backend.Meezan.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name="users")
 public class User {
+
     @Id
-    @Column(unique = true, nullable = false)
-    private Long id;
+    @Column(nullable = false, unique = true)
+    private Long cnic;
 
     @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false)
-    private String accountTitle;
-
-    @Column(nullable = false)
-    private String fileStatus;
-
-    @Column(nullable = false)
-    private String zakatdeductionstatus;
-
-    @Column(nullable = false)
-    private LocalDate cnicexpirationdate;
-
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime lastLoginDetails;
 
     @Column(nullable = false)
     private LocalDate dateOfBirth;
@@ -53,110 +34,39 @@ public class User {
 
     @Column(nullable = false)
     private String country;
-    //private String location;
 
+    @Column(nullable = false)
+    private LocalDate cnicExpirationDate;
 
-    public Long getId() {
-        return id;
-    }
+    @Column(nullable = false)
+    private LocalDateTime lastLoginDetails;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference // ✅ fix for JSON infinite recursion
+    private List<Account> accounts;
 
-    public String getName() {
-        return name;
-    }
+    /** ✅ Getters and setters **/
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAccountTitle() {
-        return accountTitle;
-    }
-
-    public void setAccountTitle(String accountTitle) {
-        this.accountTitle = accountTitle;
-    }
-
-    public String getFileStatus() {
-        return fileStatus;
-    }
-
-    public void setFileStatus(String fileStatus) {
-        this.fileStatus = fileStatus;
-    }
-
-    public String getZakatdeductionstatus() {
-        return zakatdeductionstatus;
-    }
-
-    public void setZakatdeductionstatus(String zakatdeductionstatus) {
-        this.zakatdeductionstatus = zakatdeductionstatus;
-    }
-
-    public LocalDate getCnicexpirationdate() {
-        return cnicexpirationdate;
-    }
-
-    public void setCnicexpirationdate(LocalDate cnicexpirationdate) {
-        this.cnicexpirationdate = cnicexpirationdate;
-    }
-
-    public LocalDateTime getLastLoginDetails() {
-        return lastLoginDetails;
-    }
-
-    public void setLastLoginDetails(LocalDateTime lastLoginDetails) {
-        this.lastLoginDetails = lastLoginDetails;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public String getRegisteredHomeAddress() {
-        return registeredHomeAddress;
-    }
-
-    public void setRegisteredHomeAddress(String registeredHomeAddress) {
-        this.registeredHomeAddress = registeredHomeAddress;
-    }
-
-    public String getRegisteredContactNumber() {
-        return registeredContactNumber;
-    }
-
-    public void setRegisteredContactNumber(String registeredContactNumber) {
-        this.registeredContactNumber = registeredContactNumber;
-    }
-
-    public String getRegisteredEmailAddress() {
-        return registeredEmailAddress;
-    }
-
-    public void setRegisteredEmailAddress(String registeredEmailAddress) {
-        this.registeredEmailAddress = registeredEmailAddress;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
+    public Long getCnic() { return cnic; }
+    public void setCnic(Long cnic) { this.cnic = cnic; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+    public String getRegisteredHomeAddress() { return registeredHomeAddress; }
+    public void setRegisteredHomeAddress(String registeredHomeAddress) { this.registeredHomeAddress = registeredHomeAddress; }
+    public String getRegisteredContactNumber() { return registeredContactNumber; }
+    public void setRegisteredContactNumber(String registeredContactNumber) { this.registeredContactNumber = registeredContactNumber; }
+    public String getRegisteredEmailAddress() { return registeredEmailAddress; }
+    public void setRegisteredEmailAddress(String registeredEmailAddress) { this.registeredEmailAddress = registeredEmailAddress; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
+    public LocalDate getCnicExpirationDate() { return cnicExpirationDate; }
+    public void setCnicExpirationDate(LocalDate cnicExpirationDate) { this.cnicExpirationDate = cnicExpirationDate; }
+    public LocalDateTime getLastLoginDetails() { return lastLoginDetails; }
+    public void setLastLoginDetails(LocalDateTime lastLoginDetails) { this.lastLoginDetails = lastLoginDetails; }
+    public List<Account> getAccounts() { return accounts; }
+    public void setAccounts(List<Account> accounts) { this.accounts = accounts; }
 }
