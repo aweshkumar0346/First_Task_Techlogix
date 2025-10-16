@@ -74,11 +74,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
 
     const { router } = params;
     self.move = () => {
-      const currentUser = localStorage.getItem("currentUser");
-  if (!currentUser) {
-    alert("Profile not loaded yet, please wait a moment.");
-    return;
-  }
+      localStorage.setItem("editSource", "myprofile");
       // 🟢 Ensure the latest profile data is saved before navigatio
       router.go({ path: "editprofile" });
     };

@@ -43,50 +43,45 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
     });
 
     self.loadFromLocalStorage = function () {
-      // 🟢 First, check if there’s a pending edit (unsaved changes)
-      const pending = localStorage.getItem("pendingUpdate");
-      const current = localStorage.getItem("currentUser");
+  const pending = localStorage.getItem("pendingUpdate");
+  const current = localStorage.getItem("currentUser");
+  const source = localStorage.getItem("editSource"); // 👈 who sent us here
 
-      if (pending) {
-        console.log("📦 Loading pending update data (unsaved edits)...");
-        try {
-          const data = JSON.parse(pending);
-          self.cnic(data.cnic);
-          self.contactNumber(data.registeredContactNumber || "");
-          self.email(data.registeredEmailAddress || "");
-          self.address(data.registeredHomeAddress || "");
-          self.selectedCountry(data.country || "");
-          self.selectedCity(data.city || "");
-          // keep CNIC expiry date from current profile if available
-          if (current) {
-            const user = JSON.parse(current);
-            self.cnicExpirationDate(user.cnicExpirationDate || "");
-          }
-          return;
-        } catch (e) {
-          console.error("⚠️ Failed to parse pendingUpdate:", e);
-        }
-      }
+  // 🧠 Decision logic
+  if (source === "otpscreen" && pending) {
+    console.log("📦 Loading pending edit (back from OTP screen)");
+    try {
+      const data = JSON.parse(pending);
+      self.cnic(data.cnic);
+      self.contactNumber(data.registeredContactNumber || "");
+      self.email(data.registeredEmailAddress || "");
+      self.address(data.registeredHomeAddress || "");
+      self.selectedCountry(data.country || "");
+      self.selectedCity(data.city || "");
+    } catch (e) {
+      console.error("⚠️ Failed to parse pendingUpdate:", e);
+    }
+  } else if (current) {
+    console.log("📦 Loading profile data (from MyProfile)");
+    try {
+      const user = JSON.parse(current);
+      self.cnic(user.cnic);
+      self.contactNumber(user.registeredContactNumber || "");
+      self.email(user.registeredEmailAddress || "");
+      self.address(user.registeredHomeAddress || "");
+      self.selectedCountry(user.country || "");
+      self.selectedCity(user.city || "");
+      self.cnicExpirationDate(user.cnicExpirationDate || "");
+    } catch (e) {
+      console.error("⚠️ Failed to parse currentUser:", e);
+    }
+  } else {
+    console.warn("⚠️ No local profile data found in storage.");
+  }
 
-      // 🟢 Otherwise, load the main saved profile data
-      if (current) {
-        console.log("📦 Loading current user data (from profile)...");
-        try {
-          const user = JSON.parse(current);
-          self.cnic(user.cnic);
-          self.contactNumber(user.registeredContactNumber || "");
-          self.email(user.registeredEmailAddress || "");
-          self.address(user.registeredHomeAddress || "");
-          self.selectedCountry(user.country || "");
-          self.selectedCity(user.city || "");
-          self.cnicExpirationDate(user.cnicExpirationDate || "");
-        } catch (e) {
-          console.error("⚠️ Failed to parse currentUser:", e);
-        }
-      } else {
-        console.warn("⚠️ No local profile data found in storage.");
-      }
-    };
+  // Clear the flag after using it
+  localStorage.removeItem("editSource");
+};
 
     self.formattedId = ko.computed(function () {
       const raw = String(self.cnic() || "").trim();
