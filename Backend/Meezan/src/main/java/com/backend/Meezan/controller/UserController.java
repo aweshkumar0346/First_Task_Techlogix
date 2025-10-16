@@ -2,9 +2,11 @@ package com.backend.Meezan.controller;
 
 import com.backend.Meezan.model.OtpStore;
 import com.backend.Meezan.model.User;
+import com.backend.Meezan.model.UserSummary;
 import com.backend.Meezan.repo.AccountRepo;
 import com.backend.Meezan.repo.OtpStoreRepo;
 import com.backend.Meezan.repo.UserRepo;
+import com.backend.Meezan.repo.UserSummaryRepo;
 import com.backend.Meezan.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +33,9 @@ public class UserController {
 
     @Autowired
     private OtpStoreRepo otpRepo;
+
+    @Autowired
+    private UserSummaryRepo summaryrepo;
 
     /** STEP 1: Generate & Save OTP */
     @PostMapping("/request-otp")
@@ -154,4 +159,25 @@ public class UserController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    /** STEP 5: View UserSummar*/
+    @GetMapping("/usersummary/{cnic}")
+    public ResponseEntity<?> getSummaryByCnic(@PathVariable Long cnic) {
+        List<UserSummary> summaries = summaryrepo.findByCnic(cnic);
+
+        if (summaries == null || summaries.isEmpty()) {
+            // Return a readable JSON error response
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("timestamp", LocalDateTime.now());
+            errorResponse.put("status", 404);
+            errorResponse.put("error", "User not found");
+            errorResponse.put("message", "No user found with CNIC: " + cnic);
+
+            return ResponseEntity.status(404).body(errorResponse);
+        }
+
+        // ✅ Success response
+        return ResponseEntity.ok(summaries);
+    }
+
 }

@@ -3,7 +3,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
     var self = this;
 
     // 🟢 Use CNIC as primary ID (matches backend)
-    self.cnic = ko.observable(7894587125487);
+    self.cnic = ko.observable(3265874859999);
 
     // User fields
     self.name = ko.observable();
