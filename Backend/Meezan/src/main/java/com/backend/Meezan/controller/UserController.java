@@ -7,6 +7,7 @@ import com.backend.Meezan.repo.AccountRepo;
 import com.backend.Meezan.repo.OtpStoreRepo;
 import com.backend.Meezan.repo.UserRepo;
 import com.backend.Meezan.repo.UserSummaryRepo;
+import com.backend.Meezan.service.EmailService;
 import com.backend.Meezan.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,9 @@ public class UserController {
     @Autowired
     private UserSummaryRepo summaryrepo;
 
+    @Autowired
+    private EmailService emailService;
+
     /** STEP 1: Generate & Save OTP */
     @PostMapping("/request-otp")
     public ResponseEntity<Map<String, String>> requestOtp(@RequestBody User user) {
@@ -55,6 +59,7 @@ public class UserController {
                 otpRepo.save(new OtpStore(email, otp));
             }
 
+            emailService.sendOtpEmail(email,otp);
             // ✅ Print the OTP in server console for debugging
             System.out.println("🔐 OTP generated for " + email + ": " + otp);
 

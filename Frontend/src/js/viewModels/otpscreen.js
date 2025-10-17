@@ -11,17 +11,16 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
     console.log("🟢 OTPScreenViewModel loaded");
 
     // 🔹 Navigation
-   // 🔹 Navigation
-self.goBack = () => {
-  localStorage.setItem("editSource", "otpscreen");
-  router.go({ path: "editprofile" });
-};
+    // 🔹 Navigation
+    self.goBack = () => {
+      localStorage.setItem("editSource", "otpscreen");
+      router.go({ path: "editprofile" });
+    };
 
-self.goNext = () => {
-  localStorage.removeItem("editSource");
-  router.go({ path: "myprofile" });
-};
-
+    self.goNext = () => {
+      localStorage.removeItem("editSource");
+      router.go({ path: "myprofile" });
+    };
 
     // 🔹 OTP input observables (6 digits)
     self.otpDigits = ko.observableArray([
