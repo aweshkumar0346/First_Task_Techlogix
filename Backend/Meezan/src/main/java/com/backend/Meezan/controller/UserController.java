@@ -1,5 +1,6 @@
 package com.backend.Meezan.controller;
 
+import com.backend.Meezan.model.Account;
 import com.backend.Meezan.model.OtpStore;
 import com.backend.Meezan.model.User;
 import com.backend.Meezan.model.UserSummary;
@@ -184,5 +185,18 @@ public class UserController {
         // ✅ Success response
         return ResponseEntity.ok(summaries);
     }
+
+
+    @PostMapping("/addAccount/{cnic}")
+    public ResponseEntity<?> addAccount(@PathVariable Long cnic, @RequestBody Account account) {
+        return repo.findById(cnic)
+                .map(user -> {
+                    account.setUser(user);
+                    accountRepo.save(account);
+                    return ResponseEntity.ok(Map.of("message", "Account added successfully"));
+                })
+                .orElse(ResponseEntity.status(404).body(Map.of("error", "User not found")));
+    }
+
 
 }

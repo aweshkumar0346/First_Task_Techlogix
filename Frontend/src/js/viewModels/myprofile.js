@@ -54,7 +54,7 @@ define(["knockout", "../accUtils"], function (ko, accUtils) {
 
         // ✅ Populate account (take first if multiple)
         if (profile.accounts && profile.accounts.length > 0) {
-          const account = profile.accounts[0];
+          const account = profile.accounts[1];
           self.accountTitle(account.accountTitle);
           self.fileStatus(account.fileStatus);
           self.zakatDeductionStatus(account.zakatDeductionStatus);
